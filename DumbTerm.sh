@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 clear
 w=50
-h=16
+h=17
 
 export NEWT_COLORS='root=,black'
 
@@ -52,7 +52,7 @@ func createProfile() {
 
 func pickProfile() {
 	list=(`cat ~/.config/term/profiles`); profiles=(); for ID in $list; do; profiles+=($ID "`cat ~/.config/term/$ID/name`"); done
-	PROFILE=$(whiptail --menu "Pick a profile" $h $w 10 ${profiles[@]} --clear --notags --title "Profiles" 3>&1 1>&2 2>&3) || return 1
+	PROFILE=$(whiptail --menu "Pick a profile" $h $w 11 ${profiles[@]} --clear --notags --title "Profiles" 3>&1 1>&2 2>&3) || return 1
 }
 
 ########################################################################
@@ -60,7 +60,8 @@ func pickProfile() {
 ########################################################################
 
 func runXCommand() {
-   echo "$1 || xterm -maximized -e \"sleep 0.1; NEWT_COLORS='root=,red' whiptail --msgbox 'Failed to connect' $h $w --title Error\"" >> ~/.xinitrc # Add the command to xinitrc
+   WM_COMMAND=`cat ~/.config/term/wm`; unset S; if [ ! $WM_COMMAND = "" ]; then; $S="&"; fi
+   echo "$1 $S || xterm -maximized -e \"sleep 0.1; NEWT_COLORS='root=,red' whiptail --msgbox 'Failed to connect' $h $w --title Error\"" >> ~/.xinitrc # Add the command to xinitrc
    echo "`cat ~/.config/term/wm`" >> ~/.xinitrc
    xinit # Start the session
    head -n -2 ~/.xinitrc | sponge ~/.xinitrc # Remove the command from xinitrc
