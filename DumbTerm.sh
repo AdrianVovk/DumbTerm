@@ -60,7 +60,8 @@ func pickProfile() {
 ########################################################################
 
 func runXCommand() {
-   echo $1 >> ~/.xinitrc # Add the command to xinitrc
+   CODE="xterm -maximized -e \"sleep 0.1; NEWT_COLORS='root=,red' whiptail --msgbox 'Failed to connect' $h $w --title Error\""; echo $CODE > /tmp/xssherror
+   echo "$1 || `cat /tmp/xssherror`" >> ~/.xinitrc # Add the command to xinitrc
    xinit # Start the session
    head -n -1 ~/.xinitrc | sponge ~/.xinitrc # Remove the command from xinitrc
 }
