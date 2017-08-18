@@ -159,7 +159,7 @@ func menu() {
 		menu ;;
 		"x11")
 		   pickProfile
-			COMMAND=$(whiptail --inputbox "Enter a graphical program to run on `cat ~/.config/term/$PROFILE/name`" $h $w `cat ~/.config/term/$PROFILE/lastX11` --title "Run GUI" 3>&1 1>&2 2>&3)
+			COMMAND=$(whiptail --inputbox "Enter a graphical program to run on `cat ~/.config/term/$PROFILE/name`" $h $w "`cat ~/.config/term/$PROFILE/lastX11`" --title "Run GUI" 3>&1 1>&2 2>&3)
 			echo $COMMAND > ~/.config/term/$PROFILE/lastX11
 			login $PROFILE $COMMAND x11
 		menu ;;
