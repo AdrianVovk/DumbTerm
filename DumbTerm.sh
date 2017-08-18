@@ -238,6 +238,7 @@ func advanced() {
 			whiptail --yesno "DumbTerm is a little script that can be run at startup to turn your device in a pseudo-dumb-terminal." $h $w --title "About" --yes-button "Update" --no-button "Ok"
 			if [ $? = 0 ]; then
 		      cd `dirname $(readlink $0)` && git pull && sleep 2 && exit 0
+		      sleep 2
 			fi
 		advanced ;;
 		"reload")
