@@ -97,7 +97,7 @@ func loginStandard() {
 		NAME=`cat $1/ip`
 	fi
 	pass "Password for $NAME"
-   COMMAND="sshpass -p $SSHPASS ssh -t -X `cat $1/user`@`cat $1/ip` -p `cat $1/port` $2"
+   COMMAND="sshpass -p \"$SSHPASS\" ssh -t -X `cat $1/user`@`cat $1/ip` -p `cat $1/port` $2"
    if [ "$3" = "x11" ]; then
       runXCommand $COMMAND
    else
@@ -123,7 +123,7 @@ func loginTunnel() {
 #	CHILD_SSH="ssh -t `cat $1/user`@`cat $1/ip` -p `cat $1/port` $2"
 #	TUN_SSH="ssh -t `cat $1/tun-user`@`cat $1/tun-ip` -p `cat $1/tun-port` \"sshpass -p $CHILDPASS $CHILD_SSH || eval $ERROR_CHECKER $CHILD_SSH $ERROR_CHECKER_END\""
 #   ( sshpass -p "$TUNPASS" $TUN_SSH || eval $ERROR_CHECKER $TUN_SSH $ERROR_CHECKER_END ) || error "Failed to connect"
-	COMMAND="sshpass -p "$TUNPASS" ssh -t `cat $1/tun-user`@`cat $1/tun-ip` -p `cat $1/tun-port` \"sshpass -p $CHILDPASS ssh -t `cat $1/user`@`cat $1/ip` -p `cat $1/port` $2\""
+	COMMAND="sshpass -p "$TUNPASS" ssh -t `cat $1/tun-user`@`cat $1/tun-ip` -p `cat $1/tun-port` \"sshpass -p \"$CHILDPASS\" ssh -t `cat $1/user`@`cat $1/ip` -p `cat $1/port` $2\""
 	if [ $3 = "x11" ]; then
 	   error "Tunnels are currently unsupported with X"
 	else
