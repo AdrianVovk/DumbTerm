@@ -140,7 +140,7 @@ func menu() {
 	defaultName=`ID=$(cat ~/.config/term/defaultProfile);cat ~/.config/term/$ID/name`
 	whiptail --menu "" $h $w 6 "login" "Login ($defaultName)" \
 		"run" "Run a command on $defaultName" \
-		"x11" "Run a graphical program on $defaultName" \
+		"x11" "Run a graphical program" \
 		"profiles" "All profiles" \
 		"tmp" "One-time login" \
 		"more" "Advanced" \
@@ -159,7 +159,7 @@ func menu() {
 		"x11")
 			COMMAND=$(whiptail --inputbox "Enter a graphical program to run on $defaultName" $h $w `cat ~/.config/term/lastX11` --title "Run GUI" 3>&1 1>&2 2>&3)
 			echo $COMMAND > ~/.config/term/lastX11
-			login `cat ~/.config/term/defaultProfile` $COMMAND x11 && sleep 2
+			pickProfile && login $PROFILE $COMMAND x11
 		menu ;;
 		"profiles")
 			pickProfile && login $PROFILE
@@ -234,7 +234,10 @@ func advanced() {
 			fi
 		advanced ;;
 		"about")
-			whiptail --msgbox "DumbTerm is a little script that can be run at startup to turn your device in a pseudo-dumb-terminal." $h $w --title "About"
+			whiptail --yesno "DumbTerm is a little script that can be run at startup to turn your device in a pseudo-dumb-terminal." $h $w --title "About" --yes-button "Update" --no-button "Ok"
+			if [ $? = 0 ]; then
+			   cd `cat /opt/DumbTermInstall` && git pull && exit 0
+			fi
 		advanced ;;
 		"reload")
 			exit 0
