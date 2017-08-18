@@ -101,7 +101,7 @@ func loginStandard() {
    if [ "$3" = "x11" ]; then
       runXCommand $COMMAND
    else
-    $COMMAND || error "Failed to connect"
+    eval $COMMAND || error "Failed to connect"
    fi
 #	SSH="ssh -t `cat $1/user`@`cat $1/ip` -p `cat $1/port` $2"
 #	sshpass -p $SSHPASS $SSH || if [ $? -eq 6 ]; then; error "Please try again"; $SSH; else; error "Failed to connect"; fi
@@ -123,11 +123,11 @@ func loginTunnel() {
 #	CHILD_SSH="ssh -t `cat $1/user`@`cat $1/ip` -p `cat $1/port` $2"
 #	TUN_SSH="ssh -t `cat $1/tun-user`@`cat $1/tun-ip` -p `cat $1/tun-port` \"sshpass -p $CHILDPASS $CHILD_SSH || eval $ERROR_CHECKER $CHILD_SSH $ERROR_CHECKER_END\""
 #   ( sshpass -p "$TUNPASS" $TUN_SSH || eval $ERROR_CHECKER $TUN_SSH $ERROR_CHECKER_END ) || error "Failed to connect"
-	COMMAND="sshpass -p "$TUNPASS" ssh -t `cat $1/tun-user`@`cat $1/tun-ip` -p `cat $1/tun-port` \"sshpass -p \"$CHILDPASS\" ssh -t `cat $1/user`@`cat $1/ip` -p `cat $1/port` $2\""
-	if [ $3 = "x11" ]; then
+	COMMAND="sshpass -p \"$TUNPASS\" ssh -t `cat $1/tun-user`@`cat $1/tun-ip` -p `cat $1/tun-port` \"sshpass -p \"$CHILDPASS\" ssh -t `cat $1/user`@`cat $1/ip` -p `cat $1/port` $2\""
+	if [ "$3" = "x11" ]; then
 	   error "Tunnels are currently unsupported with X"
 	else
-		$COMMAND || error "Failed to connect"
+		eval $COMMAND || error "Failed to connect"
 	fi
 	unset TUNPASS CHILDPASS SSHPASS #TUN_SSH
 }
