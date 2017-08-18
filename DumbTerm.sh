@@ -157,9 +157,10 @@ func menu() {
 				echo -n "-------------------- DONE. PRESS ANY KEY TO EXIT. --------------------"; read -k1 -s
 		menu ;;
 		"x11")
-			COMMAND=$(whiptail --inputbox "Enter a graphical program to run on $defaultName" $h $w `cat ~/.config/term/lastX11` --title "Run GUI" 3>&1 1>&2 2>&3)
-			echo $COMMAND > ~/.config/term/lastX11
-			pickProfile && login $PROFILE $COMMAND x11
+		   pickProfile
+			COMMAND=$(whiptail --inputbox "Enter a graphical program to run on `cat ~/.config/term/$PROFILE/name`" $h $w `cat ~/.config/term/$PROFILE/lastX11` --title "Run GUI" 3>&1 1>&2 2>&3)
+			echo $COMMAND > ~/.config/term/$PROFILE/lastX11
+			login $PROFILE $COMMAND x11
 		menu ;;
 		"profiles")
 			pickProfile && login $PROFILE
@@ -236,7 +237,7 @@ func advanced() {
 		"about")
 			whiptail --yesno "DumbTerm is a little script that can be run at startup to turn your device in a pseudo-dumb-terminal." $h $w --title "About" --yes-button "Update" --no-button "Ok"
 			if [ $? = 0 ]; then
-			   cd `cat /opt/DumbTermInstall` && git pull && exit 0
+			   cd `cat /opt/DumbTermInstall` && git pull && sleep 2 && exit 0
 			fi
 		advanced ;;
 		"reload")
