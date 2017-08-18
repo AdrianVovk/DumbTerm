@@ -101,10 +101,8 @@ func loginStandard() {
    if [ "$3" = "x11" ]; then
       runXCommand $COMMAND
    else
-    eval $COMMAND || error "Failed to connect"
+    eval $COMMAND || error "Failed to connect\nYou may need to set up authentication"
    fi
-#	SSH="ssh -t `cat $1/user`@`cat $1/ip` -p `cat $1/port` $2"
-#	sshpass -p $SSHPASS $SSH || if [ $? -eq 6 ]; then; error "Please try again"; $SSH; else; error "Failed to connect"; fi
 	unset SSHPASS
 }
 
@@ -119,30 +117,25 @@ func loginTunnel() {
 		TUNPASS=$SSHPASS
 		CHILDPASS=$SSHPASS
 	fi
-#	ERROR_CHECKER="if [ $? -eq 6 ]; then; "; ERROR_CHECKER_END="; else; return 255; fi"
-#	CHILD_SSH="ssh -t `cat $1/user`@`cat $1/ip` -p `cat $1/port` $2"
-#	TUN_SSH="ssh -t `cat $1/tun-user`@`cat $1/tun-ip` -p `cat $1/tun-port` \"sshpass -p $CHILDPASS $CHILD_SSH || eval $ERROR_CHECKER $CHILD_SSH $ERROR_CHECKER_END\""
-#   ( sshpass -p "$TUNPASS" $TUN_SSH || eval $ERROR_CHECKER $TUN_SSH $ERROR_CHECKER_END ) || error "Failed to connect"
 	COMMAND="sshpass -p \"$TUNPASS\" ssh -t `cat $1/tun-user`@`cat $1/tun-ip` -p `cat $1/tun-port` \"sshpass -p \"$CHILDPASS\" ssh -t `cat $1/user`@`cat $1/ip` -p `cat $1/port` $2\""
 	if [ "$3" = "x11" ]; then
 	   error "Tunnels are currently unsupported with X"
 	else
-		eval $COMMAND || error "Failed to connect"
+		eval $COMMAND || error "Failed to connect\nYou may need to set up authentication"
 	fi
 	unset TUNPASS CHILDPASS SSHPASS #TUN_SSH
 }
 
 ########################################################################
-# MAIN
+# MENUS
 ########################################################################
 
 func menu() {
 	clear
 	defaultName=`ID=$(cat ~/.config/term/defaultProfile);cat ~/.config/term/$ID/name`
-	whiptail --menu "" $h $w 6 "login" "Login ($defaultName)" \
-		"run" "Run a command on $defaultName" \
-		"x11" "Run a graphical program" \
+	whiptail --menu "" $h $w 5 "login" "Login ($defaultName)" \
 		"profiles" "All profiles" \
+      "x11" "Run a graphical program" \
 		"tmp" "One-time login" \
 		"more" "Advanced" \
 		--clear --notags --cancel-button "Shut Down" --title "Home" 0&> /tmp/start-option
@@ -151,20 +144,14 @@ func menu() {
 		"login")
 			login `cat ~/.config/term/defaultProfile`
 		menu ;;
-		"run")
-			COMMAND=$(whiptail --inputbox "Enter a command to run on $defaultName" $h $w `cat ~/.config/term/lastRun` --title "Run" 3>&1 1>&2 2>&3)
-			echo $COMMAND > ~/.config/term/lastRun
-			login `cat ~/.config/term/defaultProfile` $COMMAND && \
-				echo -n "-------------------- DONE. PRESS ANY KEY TO EXIT. --------------------"; read -k1 -s
+		"profiles")
+			pickProfile && login $PROFILE
 		menu ;;
 		"x11")
-		   pickProfile
+         pickProfile
 			COMMAND=$(whiptail --inputbox "Enter a graphical program to run on `cat ~/.config/term/$PROFILE/name`" $h $w "`cat ~/.config/term/$PROFILE/lastX11`" --title "Run GUI" 3>&1 1>&2 2>&3)
 			echo $COMMAND > ~/.config/term/$PROFILE/lastX11
 			login $PROFILE $COMMAND x11
-		menu ;;
-		"profiles")
-			pickProfile && login $PROFILE
 		menu ;;
 		"tmp")
 			createConfig /tmp/term "" "22" "" && cat /tmp/term/ip > /tmp/term/name && login /tmp/term
@@ -251,6 +238,10 @@ func advanced() {
 		advanced ;;
 	esac
 }
+
+########################################################################
+# MAIN
+########################################################################
 
 if [ ! -d ~/.config/term ]; then
 	whiptail --msgbox "It is necessary to input some default values for this tool." $h $w --title "Welcome"
