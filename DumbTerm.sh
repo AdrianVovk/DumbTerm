@@ -61,7 +61,7 @@ func pickProfile() {
 
 func runXCommand() {
    WM_COMMAND=`cat ~/.config/term/wm`; unset S; if [ ! $WM_COMMAND = "" ]; then; S="&"; fi
-   echo "( $1 || ( xterm -maximized -title 'Failed to connect' -geometry +0+0 -e \"sleep 0.1; NEWT_COLORS='root=,red' whiptail --msgbox 'Failed to connect' $h $w --title Error\" &&  killall `echo $WM_COMMAND | grep -o -P '.*\W'` ) ) $S" >> ~/.xinitrc # Add the command to xinitrc
+   echo "( $1 || ( xterm -maximized -title 'Failed to connect' -geometry +0+0 -e \"sleep 0.1; NEWT_COLORS='root=,red' whiptail --msgbox 'Failed to connect' $h $w --title Error\"; killall `echo $WM_COMMAND | grep -o -P '.*\W'` ) ) $S" >> ~/.xinitrc # Add the command to xinitrc
    echo "`cat ~/.config/term/wm`" >> ~/.xinitrc
    xinit # Start the session
    head -n -2 ~/.xinitrc | sponge ~/.xinitrc # Remove the command from xinitrc
