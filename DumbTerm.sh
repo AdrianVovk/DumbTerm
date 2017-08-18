@@ -60,8 +60,8 @@ func pickProfile() {
 ########################################################################
 
 func runXCommand() {
-   WM_COMMAND=`cat ~/.config/term/wm`; unset S; if [ ! $WM_COMMAND = "" ]; then; $S="&"; fi
-   echo "$1 $S || xterm -maximized -e \"sleep 0.1; NEWT_COLORS='root=,red' whiptail --msgbox 'Failed to connect' $h $w --title Error\"" >> ~/.xinitrc # Add the command to xinitrc
+   WM_COMMAND=`cat ~/.config/term/wm`; unset S; if [ ! $WM_COMMAND = "" ]; then; S="&"; fi
+   echo "( $1 || ( xterm -maximized -e \"sleep 0.1; NEWT_COLORS='root=,red' whiptail --msgbox 'Failed to connect' $h $w --title Error\" &&  killall `echo $WM_COMMAND | grep -o -P '.*\W'` ) ) $S" >> ~/.xinitrc # Add the command to xinitrc
    echo "`cat ~/.config/term/wm`" >> ~/.xinitrc
    xinit # Start the session
    head -n -2 ~/.xinitrc | sponge ~/.xinitrc # Remove the command from xinitrc
@@ -99,7 +99,6 @@ func loginStandard() {
 	pass "Password for $NAME"
    COMMAND="sshpass -p $SSHPASS ssh -t -X `cat $1/user`@`cat $1/ip` -p `cat $1/port` $2"
    if [ "$3" = "x11" ]; then
-      # TODO X
       runXCommand $COMMAND
    else
     $COMMAND || error "Failed to connect"
