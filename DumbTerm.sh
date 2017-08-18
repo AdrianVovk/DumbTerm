@@ -61,8 +61,9 @@ func pickProfile() {
 
 func runXCommand() {
    echo "$1 || xterm -maximized -e \"sleep 0.1; NEWT_COLORS='root=,red' whiptail --msgbox 'Failed to connect' $h $w --title Error\"" >> ~/.xinitrc # Add the command to xinitrc
+   echo "`cat ~/.config/term/wm`" >> ~/.xinitrc
    xinit # Start the session
-   head -n -1 ~/.xinitrc | sponge ~/.xinitrc # Remove the command from xinitrc
+   head -n -2 ~/.xinitrc | sponge ~/.xinitrc # Remove the command from xinitrc
 }
 
 ########################################################################
@@ -177,10 +178,11 @@ func menu() {
 
 func advanced() {
 	clear
-	whiptail --menu "" $h $w 10 "new" "Create a new profile" \
+	whiptail --menu "" $h $w 11 "new" "Create a new profile" \
 		"edit" "Edit a profile" \
 		"chdef" "Change the default profile" \
 		"del" "Delete a profile" \
+		"wm" "Set an X window manager" \
 		"net" "Configure Network" \
 		"net-login" "Log into the network" \
 		"sh" "Log in locally" \
@@ -205,6 +207,10 @@ func advanced() {
 			if [ $? != 0 ]; then; return; fi
 			sed -ie "/$ID/d" ~/.config/term/profiles
 			rm -rf ~/.config/term/$ID
+		advanced ;;
+		"wm")
+  			WM=$(whiptail --inputbox "Enter a command to run as the X window manager\nNote: it should be installed on this machine, not on the remote" $h $w "`cat ~/.config/term/wm`" --title "WM Setup" 3>&1 1>&2 2>&3)
+  			echo "$WM" > ~/.config/term/wm
 		advanced ;;
 		"net")
 			echo "Please wait..."
