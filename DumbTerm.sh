@@ -117,9 +117,9 @@ func loginTunnel() {
 		TUNPASS=$SSHPASS
 		CHILDPASS=$SSHPASS
 	fi
-	COMMAND="sshpass -p \"$TUNPASS\" ssh -t `cat $1/tun-user`@`cat $1/tun-ip` -p `cat $1/tun-port` \"sshpass -p \"$CHILDPASS\" ssh -t `cat $1/user`@`cat $1/ip` -p `cat $1/port` $2\""
+	COMMAND="sshpass -p \"$TUNPASS\" ssh -t -X `cat $1/tun-user`@`cat $1/tun-ip` -p `cat $1/tun-port` \"sshpass -p \"$CHILDPASS\" ssh -t -X `cat $1/user`@`cat $1/ip` -p `cat $1/port` $2\""
 	if [ "$3" = "x11" ]; then
-	   error "Tunnels are currently unsupported with X"
+	   runXCommand $COMMAND
 	else
 		eval $COMMAND || error "Failed to connect\nYou may need to set up authentication"
 	fi
