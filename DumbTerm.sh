@@ -28,11 +28,18 @@ func createConfig() {
 	        whiptail --inputbox "Username" $h $w `cat $1/tun-user` --title "Tunnel Setup" 0&> $1/tun-user || return 1
 
 			if [ ! -f $1/tun-pass-same ]; then; default="--defaultno"; fi
-			whiptail --yesno "Does your tunnel have the same password as your primary host?" $h $w $default --title "Tunnel Setup" && unset default
-			if [ $? = 0 ]; then; touch $1/tun-pass-same; fi
+			whiptail --yesno "Does your tunnel have the same authentication details as your primary host?" $h $w $default --title "Tunnel Setup" && unset default
+			if [ $? = 0 ]; then; touch $1/tun-pass-same; 
+			else
+				whiptail --yesno "What authentication method should the tunnel use?" $h $w --defaultno --title "Tunnel Setup" --yes-button "Passwordless" --no-button "Password"
+				if [ $? = 0 ]; then; touch $1/tun-passwordless; fi
+			fi
 
 	        touch $1/is-tun
 		fi
+
+		whiptail --yesno "What authentication method should this profile use?" $h $w --defaultno --title "Setup" --yes-button "Passwordless" --no-button "Password"
+		if [ $? = 0 ]; then; touch $1/passwordless; fi		
 
 		if [ $1 != /tmp/term ]; then
 			if [ -f $1/name ]; then
@@ -74,7 +81,11 @@ func runXCommand() {
 #TODO Make pass append strings (for different auth methods)
 
 func pass() {
-	SSHPASS=$(whiptail --passwordbox $1 $h $w --title "Login" --nocancel 3>&1 1>&2 2>&3)
+	if [ ! -f $2 ]; then
+		SSHPASS=$(whiptail --passwordbox $1 $h $w --title "Login" --nocancel 3>&1 1>&2 2>&3)
+	else
+		SSHPASS="keyauth"
+	fi
 }
 
 func login() {
@@ -94,9 +105,9 @@ func loginStandard() {
 	if [ $1 != /tmp/term ]; then
 		NAME=`cat $1/name`
 	else
-		NAME=`cat $1/ip`
-	fi
-	pass "Password for $NAME"
+    	NAME=`cat $1/ip`
+   fi
+   pass "Password for $NAME" $1/passwordless
    COMMAND="sshpass -p \"$SSHPASS\" ssh -t -X `cat $1/user`@`cat $1/ip` -p `cat $1/port` $2"
    if [ "$3" = "x11" ]; then
       runXCommand $COMMAND
@@ -108,12 +119,12 @@ func loginStandard() {
 
 func loginTunnel() {
 	if [ ! -f $1/tun-pass-same ]; then
-		pass "Password for tunnel (`cat $1/tun-ip`)"
+		pass "Password for tunnel (`cat $1/tun-ip`)" $1/tun-passwordless
 		TUNPASS=$SSHPASS
-		pass "Password for `cat $1/name`"
+		pass "Password for `cat $1/name`" $1/passwordless
 		CHILDPASS=$SSHPASS
 	else
-		pass "Password for `cat $1/name`"
+		pass "Password for `cat $1/name`" $1/passwordless
 		TUNPASS=$SSHPASS
 		CHILDPASS=$SSHPASS
 	fi
